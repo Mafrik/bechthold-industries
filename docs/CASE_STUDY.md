@@ -10,6 +10,8 @@ The system is deliberately **PAPER-only**. It does not connect to a broker, plac
 
 Desktop and mobile screens captured from the running local application:
 
+Download the [formatted three-page case study](../output/pdf/bechthold-industries-case-study.pdf).
+
 ![Desktop dashboard showing capital controls, stock chart and PAPER backtest](screenshots/dashboard.png)
 
 ![iPhone-sized dashboard with responsive capital cards and horizontal stock selector](screenshots/iphone-dashboard.png)

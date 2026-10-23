@@ -10,3 +10,5 @@
 *.dump
 backups/
 .local/
+tmp/
+.pptx-build/

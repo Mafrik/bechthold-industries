@@ -2,6 +2,8 @@
 
 Bechthold Industries is the product name for this existing AI Market Platform project.
 
+> A local-first market research and paper-trading platform built around explicit capital protection and repeatable strategy analysis. See the [project case study](docs/CASE_STUDY.md) for the architecture, product decisions and honest scope.
+
 PAPER/DEVELOPMENT ONLY. No broker and no real-money execution.
 
 Capital model: €200 BOOTSTRAP; until €350 all equity is trading capital with €50 base max position. At €350+, €200 is immediately reserved and excluded from trading capital while the API waits in BOOTSTRAP for manual `POST /api/capital/phase/confirm` with `{"confirm": true}` and the `X-Phase-Confirmation-Token` header. The pending reservation remains if equity later dips before confirmation. If total equity falls below €200, the protected portion is capped at available equity and trading capital becomes zero. Set `PHASE_CONFIRMATION_TOKEN` in the local environment before confirming; without it the API fails closed. Never put this token in the n8n workflow. After confirmation, only equity above the protected amount is trading capital. At €1000+, risk profile becomes CONSERVATIVE. Risk checks reject zero and negative position values.

@@ -37,6 +37,8 @@ Backtest and comparison summaries are saved in PostgreSQL and the dashboard list
 Run API regression tests from the PyCharm terminal:
 `docker compose exec -T api python -m unittest discover -s tests -v`
 
+GitHub Actions is configured to run the API and n8n workflow suites on pushes to `main`, pull requests and manual dispatch.
+
 To configure manual phase confirmation without editing `.env`, run these commands in the same PyCharm PowerShell terminal and keep that terminal session open:
 
 ```powershell

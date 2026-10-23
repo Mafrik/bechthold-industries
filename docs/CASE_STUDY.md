@@ -50,7 +50,7 @@ Capital-changing API actions fail closed if the confirmation token is absent or 
 | Workflow automation | n8n |
 | Market data | Alpha Vantage |
 | Interface | Responsive HTML, CSS and JavaScript; installable PWA |
-| Tests | Python `unittest`, Node.js built-in test runner |
+| Tests and CI | Python `unittest`, Node.js built-in test runner, GitHub Actions |
 
 ## Run locally
 
@@ -64,7 +64,7 @@ The script reports the dashboard URL for the computer and the private-network UR
 
 ## Verification
 
-The current API regression suite contains 43 passing tests. The n8n workflow suite contains 7 passing tests. Manual local checks confirm the API is ready, the default capital state is PAPER/BOOTSTRAP at €200, a €50 position passes, a €60 position fails, and the PWA manifest and icon are served successfully.
+The current API regression suite contains 43 passing tests. The n8n workflow suite contains 7 passing tests. A GitHub Actions workflow runs both suites on pushes to `main`, pull requests and manual dispatch. Manual local checks confirm the API is ready, the default capital state is PAPER/BOOTSTRAP at €200, a €50 position passes, a €60 position fails, and the PWA manifest and icon are served successfully.
 
 ## Known boundaries
 
@@ -78,6 +78,5 @@ The current API regression suite contains 43 passing tests. The n8n workflow sui
 ## Possible next steps
 
 1. Add a verified screenshot and a short setup demonstration for a public portfolio page.
-2. Add reproducible CI checks for the Python and n8n suites.
-3. Improve market data provenance and adjusted-price support when provider access permits.
-4. Keep authentication, deployment and any future execution integration out of scope until separately designed and reviewed.
+2. Improve market data provenance and adjusted-price support when provider access permits.
+3. Keep authentication, deployment and any future execution integration out of scope until separately designed and reviewed.

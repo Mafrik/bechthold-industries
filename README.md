@@ -79,4 +79,3 @@ Restore a backup for inspection into a **new database** (the script refuses to o
 ```
 
 The backup contains your local PAPER application data. Store it securely and remove it when it is no longer needed. Keep Docker Desktop running before using either script.
-

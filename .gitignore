@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+!.env.template
+.idea/
+.venv/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+*.dump
+backups/
+.local/

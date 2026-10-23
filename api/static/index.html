@@ -13,10 +13,20 @@
   <style>
     :root { color-scheme: dark; --bg:#0c1420; --panel:#121e2c; --panel-2:#182637; --line:#26384b; --text:#edf4fb; --muted:#98aabd; --mint:#5ee0b0; --blue:#83b7ff; --red:#ff817b; --amber:#f3c875; }
     * { box-sizing:border-box; }
-    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 78% -10%,#1d3550 0,transparent 38%),var(--bg); color:var(--text); font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+    body { margin:0; min-height:100vh; isolation:isolate; background:radial-gradient(ellipse at 78% -10%,#1d3550 0,transparent 38%),var(--bg); color:var(--text); font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif; }
+    .ambient-backdrop { position:fixed; inset:-14vh -8vw; z-index:-1; pointer-events:none; background:radial-gradient(ellipse at 17% 24%,#5ee0b014 0,transparent 28rem),radial-gradient(ellipse at 83% 58%,#83b7ff16 0,transparent 34rem),radial-gradient(ellipse at 46% 100%,#5ee0b00c 0,transparent 30rem); transform:translate3d(0,var(--scroll-parallax,0px),0); will-change:transform; }
+    .market-backdrop { position:fixed; z-index:0; top:-24vh; left:-10vw; width:120vw; height:148vh; overflow:visible; opacity:.2; pointer-events:none; transform:translate3d(0,var(--chart-parallax,0px),0); will-change:transform; }
+    .market-pulse { transform-box:fill-box; transform-origin:center; animation:marketPulse 4.8s ease-in-out infinite; }
+    .market-pulse:nth-of-type(2) { animation-delay:-1.7s; }
+    @keyframes marketPulse { 0%,100% { opacity:.35; transform:scale(.82); } 50% { opacity:.85; transform:scale(1.16); } }
     button,input,select { font:inherit; }
-    .shell { width:min(1120px,100% - 40px); margin:0 auto; padding:28px 0 42px; }
+    .shell { position:relative; z-index:1; width:min(1120px,100% - 40px); margin:0 auto; padding:28px 0 42px; }
     header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:36px; }
+    .quick-nav { display:flex; gap:8px; overflow-x:auto; padding:0 0 18px; scrollbar-width:thin; }
+    .quick-nav a { flex:none; padding:7px 11px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:12px; text-decoration:none; transition:color .16s ease,border-color .16s ease,background .16s ease; }
+    .quick-nav a:hover,.quick-nav a:focus-visible { color:var(--text); border-color:#4b718c; background:#182637; }
+    .quick-nav a:focus-visible { outline:2px solid var(--blue); outline-offset:2px; }
+    .card[id] { scroll-margin-top:16px; }
     .brand { display:flex; align-items:center; gap:12px; font-weight:700; letter-spacing:-.02em; }
     .brand-mark { display:grid; grid-template-columns:repeat(2,8px); gap:3px; transform:rotate(-12deg); }
     .brand-mark i { width:8px;height:8px;border-radius:2px;background:var(--mint); }
@@ -93,6 +103,7 @@
     #marketChart { width:100%; height:260px; display:block; margin-top:4px; }
     .market-status { min-height:20px; }
     #equityChart { width:100%; height:220px; display:block; margin-top:14px; background:#0c1723; border:1px solid #223447; border-radius:11px; }
+    #equityChart[hidden] { display:none; }
     @media (max-width:760px) { .shell { width:min(100% - 28px,600px); padding-top:18px; } header { padding-bottom:26px; } .intro { align-items:flex-start; flex-direction:column; } .quote,.risk,.phase { grid-column:span 6; } .watch-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
     @media (max-width:760px) { .backtest-controls { grid-template-columns:1fr 1fr; } .backtest-controls button { align-self:end; } .backtest-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
     @media (max-width:520px) { .shell { width:calc(100% - 24px); } header { flex-wrap:wrap; gap:11px; } .brand { font-size:13px; } .header-right { gap:6px; } .connection { padding:7px 9px; font-size:11px; } .language-select { padding:7px; } .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .metric { min-height:90px; padding:12px; } .quote,.risk,.phase { grid-column:span 12; } .card { padding:17px; border-radius:15px; } .field-row { gap:7px; } button { padding:10px 11px; } .backtest-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .watch-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
@@ -103,14 +114,44 @@
       .intro p,.subtle { overflow-wrap:anywhere; }
       .card-top { min-width:0; }
     }
+    @media (prefers-reduced-motion: reduce) { .market-backdrop { transform:none; } .market-pulse { animation:none; } }
   </style>
 </head>
 <body>
+  <div class="ambient-backdrop" aria-hidden="true"></div>
+  <svg class="market-backdrop" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <pattern id="marketGrid" width="96" height="80" patternUnits="userSpaceOnUse"><path d="M96 0H0V80" fill="none" stroke="#83b7ff" stroke-opacity=".22" stroke-width="1"/></pattern>
+      <linearGradient id="marketLine" x1="0" x2="1"><stop stop-color="#5ee0b0"/><stop offset=".55" stop-color="#83b7ff"/><stop offset="1" stop-color="#5ee0b0"/></linearGradient>
+      <linearGradient id="marketFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#5ee0b0" stop-opacity=".22"/><stop offset="1" stop-color="#5ee0b0" stop-opacity="0"/></linearGradient>
+      <filter id="marketGlow" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="7"/></filter>
+    </defs>
+    <rect width="1440" height="900" fill="url(#marketGrid)"/>
+    <g fill="none" stroke="#83b7ff" stroke-opacity=".34" stroke-width="2">
+      <path d="M0 180H1440M0 360H1440M0 540H1440M0 720H1440" stroke-dasharray="3 10"/>
+    </g>
+    <g stroke-width="3" stroke-linecap="round">
+      <path d="M155 610V520M215 560V438M275 525V456M335 455V345M395 490V410M455 420V310M515 365V280M575 400V330M635 315V220M695 360V270M755 300V190M815 330V265M875 250V170M935 280V205M995 215V130M1055 260V175M1115 200V110M1175 225V155M1235 175V90" stroke="#5ee0b0" stroke-opacity=".55"/>
+      <path d="M155 540v42h22v-42M215 470v58h22v-58M275 478v28h22v-28M335 370v62h22v-62M395 430v38h22v-38M455 335v58h22v-58M515 300v42h22v-42M575 348v26h22v-26M635 240v50h22v-50M695 300v32h22v-32M755 215v57h22v-57M815 285v28h22v-28M875 195v38h22v-38M935 220v42h22v-42M995 150v48h22v-48M1055 195v42h22v-42M1115 132v46h22v-46M1175 175v30h22v-30M1235 112v42h22v-42" fill="#5ee0b0" fill-opacity=".2" stroke="#5ee0b0" stroke-opacity=".68"/>
+    </g>
+    <path d="M0 690C130 670 145 590 235 580S340 470 410 500 520 400 590 420 690 300 760 335 850 250 930 275 1030 160 1100 205 1220 145 1300 170 1380 90 1440 110V900H0Z" fill="url(#marketFill)"/>
+    <path d="M0 690C130 670 145 590 235 580S340 470 410 500 520 400 590 420 690 300 760 335 850 250 930 275 1030 160 1100 205 1220 145 1300 170 1380 90 1440 110" fill="none" stroke="#5ee0b0" stroke-width="14" stroke-opacity=".45" filter="url(#marketGlow)"/>
+    <path d="M0 690C130 670 145 590 235 580S340 470 410 500 520 400 590 420 690 300 760 335 850 250 930 275 1030 160 1100 205 1220 145 1300 170 1380 90 1440 110" fill="none" stroke="url(#marketLine)" stroke-width="3" stroke-opacity=".9"/>
+    <g fill="#9bf2d2"><circle class="market-pulse" cx="590" cy="420" r="6"/><circle class="market-pulse" cx="1100" cy="205" r="6"/></g>
+  </svg>
   <main class="shell">
     <header>
       <div class="brand"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Bechthold Industries</div>
       <div class="header-right"><select id="languageSelect" class="language-select" data-i18n-aria="language" aria-label="Язык интерфейса"><option value="ru">RU</option><option value="de">DE</option><option value="en">EN</option></select><span class="pill">PAPER</span><span class="connection"><i id="healthDot" class="dot"></i><span id="healthText" data-i18n="healthChecking">Проверяем API</span></span></div>
     </header>
+
+    <nav class="quick-nav" data-i18n-aria="quickNavigation" aria-label="Быстрая навигация">
+      <a href="#market" data-i18n="navMarket">Рынок</a>
+      <a href="#quote" data-i18n="navQuote">Котировка</a>
+      <a href="#risk" data-i18n="navRisk">Проверка риска</a>
+      <a href="#backtest" data-i18n="navBacktest">Бэктест</a>
+      <a href="/docs" target="_blank" rel="noopener noreferrer" data-i18n="navApiDocs">Документация API ↗</a>
+    </nav>
 
     <section class="intro">
       <div><div class="eyebrow" data-i18n="dashboard">Панель управления</div><h1 data-i18n="overviewTitle">Обзор капитала</h1><p data-i18n="overviewDescription">Рыночные данные и проверки риска в симуляционном режиме.</p></div>
@@ -128,7 +169,7 @@
         </div>
       </article>
 
-      <article class="card watchlist">
+      <article class="card watchlist" id="market">
         <div class="card-top"><h2 data-i18n="watchlistTitle">Обзор рынка</h2><button class="refresh" id="watchlistRefresh" type="button" data-i18n="watchRefresh">Обновить график</button></div>
         <div class="subtle" data-i18n="watchlistProvider">Дневные цены закрытия · USD · Alpha Vantage</div>
         <div class="watch-grid" id="watchlistGrid" aria-label="Stock selection">
@@ -155,13 +196,13 @@
         <div class="subtle market-status" id="marketStatus" aria-live="polite"></div>
       </article>
 
-      <article class="card quote">
+      <article class="card quote" id="quote">
         <div class="card-top"><h2 data-i18n="quote">Котировка</h2><span class="subtle">Alpha Vantage</span></div>
         <form id="quoteForm" class="field-row"><input id="symbolInput" value="IBM" maxlength="12" data-i18n-aria="ticker" aria-label="Тикер" autocomplete="off"><select id="quoteCurrency" data-i18n-aria="quoteCurrency" aria-label="Валюта котировки"><option>USD</option><option>EUR</option><option>GBP</option><option>CHF</option><option>JPY</option><option>CAD</option><option>AUD</option></select><button id="quoteButton" type="submit" data-i18n="load">Загрузить</button></form>
         <div class="result" id="quoteResult" aria-live="polite" data-i18n="quoteHint">Введите тикер и валюту его листинга, чтобы получить котировку.</div>
       </article>
 
-      <article class="card risk">
+      <article class="card risk" id="risk">
         <div class="card-top"><h2 data-i18n="riskCheck">Проверка позиции</h2><span class="subtle" data-i18n="noOrder">Без заявки</span></div>
         <form id="riskForm" class="field-row"><input id="positionInput" type="number" min="0.01" step="0.01" value="50" data-i18n-aria="positionEuro" aria-label="Стоимость позиции в евро"><button type="submit" data-i18n="check">Проверить</button></form>
         <div class="result" id="riskResult" aria-live="polite" data-i18n="riskHint">Проверка сравнит позицию с лимитом и торговым капиталом.</div>
@@ -177,7 +218,7 @@
         </form>
         <div class="footnote" data-i18n="phaseSafety">ИИ и workflow не переключают фазу автоматически.</div>
       </article>
-      <article class="card backtest">
+      <article class="card backtest" id="backtest">
         <div class="card-top"><h2 data-i18n="backtestTitle">Исторический PAPER-бэктест</h2><span class="subtle" data-i18n="backtestSubtitle">Дневные свечи · без ордеров · без дивидендной и split-коррекции</span></div>
         <form id="backtestForm" class="backtest-controls">
           <label><span data-i18n="ticker">Тикер</span><input id="backtestSymbol" value="IBM" maxlength="12" autocomplete="off"></label>
@@ -200,7 +241,7 @@
   <script>
     const translations = {
       ru: {
-        language:'Язык интерфейса',healthChecking:'Проверяем API',healthConnected:'API подключён',healthNoConnection:'Нет связи',apiUnavailable:'API недоступен',
+        language:'Язык интерфейса',quickNavigation:'Быстрая навигация',navMarket:'Рынок',navQuote:'Котировка',navRisk:'Проверка риска',navBacktest:'Бэктест',navApiDocs:'Документация API ↗',healthChecking:'Проверяем API',healthConnected:'API подключён',healthNoConnection:'Нет связи',apiUnavailable:'API недоступен',
         dashboard:'Панель управления',overviewTitle:'Обзор капитала',overviewDescription:'Рыночные данные и проверки риска в симуляционном режиме.',refresh:'Обновить данные',portfolioCapital:'Капитал портфеля',loading:'Загрузка…',dailyCandles:'дневных свечей',
         totalEquity:'Общий капитал',tradingCapital:'Торговый капитал',protectedCapital:'Защищённый капитал',maxPosition:'Лимит одной позиции',watchlistTitle:'Обзор рынка',watchlistProvider:'Дневные цены закрытия · USD · Alpha Vantage',chartDisclaimer:'Дневные закрытия · до 100 сессий · без поправки на дивиденды и дробления',chartLoading:'Загружаем дневные цены закрытия…',chartFailed:'График недоступен',chartAsOf:'Данные на {date}',watchlistHint:'Нажмите на тикер для отдельной котировки или обновите все пять кнопкой. Фонового опроса нет, чтобы беречь лимит API.',watchRefresh:'Обновить график',watchRefreshing:'Обновляем…',watchLoading:'Загружаем котировку…',watchLoad:'Нажмите, чтобы загрузить котировку',watchUpdated:'Обновлено',watchError:'Котировка недоступна',quote:'Котировка',ticker:'Тикер',quoteCurrency:'Валюта котировки',equityChart:'График капитала по историческим данным',load:'Загрузить',quoteHint:'Введите тикер и валюту его листинга, чтобы получить котировку.',quoteLoading:'Запрашиваем котировку…',quoteFailed:'Не удалось получить котировку',noChange:'изменение не указано',
         riskCheck:'Проверка позиции',noOrder:'Без заявки',positionEuro:'Стоимость позиции в евро',check:'Проверить',riskHint:'Проверка сравнит позицию с лимитом и торговым капиталом.',checkingLimits:'Проверяем лимиты…',allowed:'Разрешено',rejected:'Отклонено',limitLabel:'лимит',tradingCapitalLabel:'торговый капитал',
@@ -213,7 +254,7 @@
         errorApi:'API недоступен',errorNoKey:'Ключ Alpha Vantage не настроен',errorSymbol:'Некорректный тикер',errorCurrency:'Валюта не поддерживается',errorMarket:'Не удалось получить рыночные данные',errorRiskCheck:'Не удалось проверить позицию',errorManualConfirm:'Требуется ручное подтверждение',errorQuoteCurrency:'Валюта котировки не поддерживается',errorFxStale:'Нет свежего валютного курса для этой даты',errorDaily:'Дневные данные недоступны; проверьте лимиты и настройки API',errorFx:'Исторический валютный курс недоступен; проверьте лимиты и настройки API',errorShortHistory:'Для сравнения нужно не менее 43 дневных свечей',errorShortStrategy:'Недостаточно дневных данных для выбранных параметров',errorSaveHistory:'Не удалось сохранить историю бэктеста',errorSaveComparison:'Не удалось сохранить историю сравнения',errorHistory:'История бэктестов недоступна',errorConfirm:'Подтверждение не принято',errorConfirmToken:'Неверный токен ручного подтверждения',errorConfirmPending:'Нет ожидающего перехода BOOTSTRAP → PROFIT_ONLY',errorConfirmDisabled:'Ручное подтверждение не настроено',errorCouldNotConvert:'Не удалось безопасно конвертировать историю в EUR',errorUnexpected:'Данные имеют неожиданный формат'
       },
       de: {
-        language:'Oberflächensprache',healthChecking:'API wird geprüft',healthConnected:'API verbunden',healthNoConnection:'Keine Verbindung',apiUnavailable:'API nicht verfügbar',
+        language:'Oberflächensprache',quickNavigation:'Schnellnavigation',navMarket:'Markt',navQuote:'Kurs',navRisk:'Risikoprüfung',navBacktest:'Backtest',navApiDocs:'API-Dokumentation ↗',healthChecking:'API wird geprüft',healthConnected:'API verbunden',healthNoConnection:'Keine Verbindung',apiUnavailable:'API nicht verfügbar',
         dashboard:'Dashboard',overviewTitle:'Kapitalübersicht',overviewDescription:'Marktdaten und Risikoprüfungen im Simulationsmodus.',refresh:'Daten aktualisieren',portfolioCapital:'Portfoliokapital',loading:'Laden…',dailyCandles:'Tageskerzen',
         totalEquity:'Gesamtkapital',tradingCapital:'Handelskapital',protectedCapital:'Geschütztes Kapital',maxPosition:'Positionslimit',watchlistTitle:'Marktüberblick',watchlistProvider:'Tägliche Schlusskurse · USD · Alpha Vantage',chartDisclaimer:'Tägliche Schlusskurse · bis zu 100 Handelstage · ohne Dividenden- und Splitbereinigung',chartLoading:'Tägliche Schlusskurse werden geladen…',chartFailed:'Diagramm nicht verfügbar',chartAsOf:'Daten vom {date}',watchlistHint:'Ticker anklicken, um einen einzelnen Kurs abzurufen, oder alle fünf mit der Schaltfläche aktualisieren. Keine Hintergrundabfragen, um das API-Limit zu schonen.',watchRefresh:'Diagramm aktualisieren',watchRefreshing:'Wird aktualisiert…',watchLoading:'Kurs wird geladen…',watchLoad:'Klicken, um den Kurs zu laden',watchUpdated:'Aktualisiert',watchError:'Kurs nicht verfügbar',quote:'Kurs',ticker:'Ticker',quoteCurrency:'Kurswährung',equityChart:'Kapitalverlauf anhand historischer Daten',load:'Laden',quoteHint:'Ticker und Notierungswährung eingeben, um einen aktuellen Kurs abzurufen.',quoteLoading:'Kurs wird abgerufen…',quoteFailed:'Kurs konnte nicht abgerufen werden',noChange:'keine Veränderung angegeben',
         riskCheck:'Positionsprüfung',noOrder:'Keine Order',positionEuro:'Positionswert in Euro',check:'Prüfen',riskHint:'Vergleicht den Positionswert mit dem Limit und dem Handelskapital.',checkingLimits:'Limits werden geprüft…',allowed:'Zulässig',rejected:'Abgelehnt',limitLabel:'Limit',tradingCapitalLabel:'Handelskapital',
@@ -226,7 +267,7 @@
         errorApi:'API nicht verfügbar',errorNoKey:'Alpha-Vantage-API-Schlüssel ist nicht konfiguriert',errorSymbol:'Ungültiger Ticker',errorCurrency:'Währung wird nicht unterstützt',errorMarket:'Marktdaten konnten nicht abgerufen werden',errorRiskCheck:'Position konnte nicht geprüft werden',errorManualConfirm:'Manuelle Bestätigung ist erforderlich',errorQuoteCurrency:'Kurswährung wird nicht unterstützt',errorFxStale:'Für dieses Datum ist kein aktueller Wechselkurs verfügbar',errorDaily:'Tagesdaten nicht verfügbar; API-Limits und Konfiguration prüfen',errorFx:'Historischer Wechselkurs nicht verfügbar; API-Limits und Konfiguration prüfen',errorShortHistory:'Für den Vergleich sind mindestens 43 Tageskerzen erforderlich',errorShortStrategy:'Zu wenige Tagesdaten für diese Parameter',errorSaveHistory:'Backtest-Verlauf konnte nicht gespeichert werden',errorSaveComparison:'Vergleichsverlauf konnte nicht gespeichert werden',errorHistory:'Backtest-Verlauf nicht verfügbar',errorConfirm:'Bestätigung wurde abgelehnt',errorConfirmToken:'Token für manuelle Bestätigung ist ungültig',errorConfirmPending:'Kein ausstehender Wechsel von BOOTSTRAP zu PROFIT_ONLY',errorConfirmDisabled:'Manuelle Bestätigung ist nicht konfiguriert',errorCouldNotConvert:'Historische Daten konnten nicht sicher in EUR umgerechnet werden',errorUnexpected:'Unerwartetes Datenformat'
       },
       en: {
-        language:'Interface language',healthChecking:'Checking API',healthConnected:'API connected',healthNoConnection:'No connection',apiUnavailable:'API unavailable',
+        language:'Interface language',quickNavigation:'Quick navigation',navMarket:'Market',navQuote:'Quote',navRisk:'Risk check',navBacktest:'Backtest',navApiDocs:'API docs ↗',healthChecking:'Checking API',healthConnected:'API connected',healthNoConnection:'No connection',apiUnavailable:'API unavailable',
         dashboard:'Dashboard',overviewTitle:'Capital overview',overviewDescription:'Market data and risk checks in simulation mode.',refresh:'Refresh data',portfolioCapital:'Portfolio capital',loading:'Loading…',dailyCandles:'daily candles',
         totalEquity:'Total equity',tradingCapital:'Trading capital',protectedCapital:'Protected capital',maxPosition:'Single-position limit',watchlistTitle:'Market watch',watchlistProvider:'Daily closing prices · USD · Alpha Vantage',chartDisclaimer:'Daily closes · up to 100 sessions · excludes dividend and split adjustments',chartLoading:'Loading daily closing prices…',chartFailed:'Chart unavailable',chartAsOf:'Data as of {date}',watchlistHint:'Select a ticker for one quote or update all five with the button. No background polling is used to conserve API quota.',watchRefresh:'Refresh chart',watchRefreshing:'Updating…',watchLoading:'Loading quote…',watchLoad:'Select to load quote',watchUpdated:'Updated',watchError:'Quote unavailable',quote:'Quote',ticker:'Ticker',quoteCurrency:'Quote currency',equityChart:'Equity chart from historical data',load:'Load',quoteHint:'Enter a ticker and its listing currency to get the latest quote.',quoteLoading:'Fetching quote…',quoteFailed:'Could not retrieve quote',noChange:'change not reported',
         riskCheck:'Position check',noOrder:'No order',positionEuro:'Position value in euros',check:'Check',riskHint:'Compares the position value with the limit and trading capital.',checkingLimits:'Checking limits…',allowed:'Allowed',rejected:'Rejected',limitLabel:'limit',tradingCapitalLabel:'trading capital',
@@ -629,6 +670,20 @@
       } catch (error) { lastComparisonState = {error:error.message}; renderComparisonState(); }
       finally { button.disabled = false; }
     });
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      let scrollFrame = 0;
+      const syncScrollBackdrop = () => {
+        window.cancelAnimationFrame(scrollFrame);
+        scrollFrame = window.requestAnimationFrame(() => {
+          const offset = Math.min(window.scrollY, 2200);
+          document.documentElement.style.setProperty('--scroll-parallax', `${-offset * 0.07}px`);
+          document.documentElement.style.setProperty('--chart-parallax', `${-offset * 0.16}px`);
+        });
+      };
+      window.addEventListener('scroll', syncScrollBackdrop, {passive:true});
+      syncScrollBackdrop();
+    }
 
     refreshDashboard();
   </script>

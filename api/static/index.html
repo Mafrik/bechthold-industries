@@ -96,6 +96,13 @@
     @media (max-width:760px) { .shell { width:min(100% - 28px,600px); padding-top:18px; } header { padding-bottom:26px; } .intro { align-items:flex-start; flex-direction:column; } .quote,.risk,.phase { grid-column:span 6; } .watch-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
     @media (max-width:760px) { .backtest-controls { grid-template-columns:1fr 1fr; } .backtest-controls button { align-self:end; } .backtest-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); } }
     @media (max-width:520px) { .shell { width:calc(100% - 24px); } header { flex-wrap:wrap; gap:11px; } .brand { font-size:13px; } .header-right { gap:6px; } .connection { padding:7px 9px; font-size:11px; } .language-select { padding:7px; } .metrics { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .metric { min-height:90px; padding:12px; } .quote,.risk,.phase { grid-column:span 12; } .card { padding:17px; border-radius:15px; } .field-row { gap:7px; } button { padding:10px 11px; } .backtest-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); } .watch-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media (max-width:520px) {
+      .header-right { max-width:100%; flex-wrap:wrap; justify-content:flex-end; }
+      .connection { max-width:130px; overflow:hidden; text-overflow:ellipsis; }
+      .intro > div { max-width:100%; min-width:0; }
+      .intro p,.subtle { overflow-wrap:anywhere; }
+      .card-top { min-width:0; }
+    }
   </style>
 </head>
 <body>

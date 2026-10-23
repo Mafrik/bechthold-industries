@@ -6,6 +6,14 @@ Bechthold Industries is a private, local-first market research dashboard for des
 
 The system is deliberately **PAPER-only**. It does not connect to a broker, place orders or claim that a backtest predicts future results. The project is intended for one person to run on a home computer, with an iPhone connecting over the same private Wi-Fi network.
 
+## Interface preview
+
+Desktop and mobile screens captured from the running local application:
+
+![Desktop dashboard showing capital controls, stock chart and PAPER backtest](screenshots/dashboard.png)
+
+![iPhone-sized dashboard with responsive capital cards and horizontal stock selector](screenshots/iphone-dashboard.png)
+
 ## Product problem
 
 Small strategy experiments are easy to misread when market data, capital assumptions and risk limits live in separate tools. The platform keeps those assumptions visible, makes capital protection explicit and labels historical strategy results as simulations.
@@ -75,8 +83,8 @@ The current API regression suite contains 43 passing tests. The n8n workflow sui
 - This local personal tool is not hardened or reviewed as a public multi-user service.
 - The iPhone experience is a PWA shortcut, not a native App Store application.
 
-## Possible next steps
+## Future improvements
 
-1. Add a verified screenshot and a short setup demonstration for a public portfolio page.
-2. Improve market data provenance and adjusted-price support when provider access permits.
-3. Keep authentication, deployment and any future execution integration out of scope until separately designed and reviewed.
+1. Improve market data provenance and adjusted-price support when provider access permits.
+2. Add authentication and a deployment security review before considering access beyond one trusted local user.
+3. Keep any future broker execution integration out of scope until separately designed, reviewed and explicitly authorized.

@@ -22,7 +22,7 @@ Small strategy experiments are easy to misread when market data, capital assumpt
 
 ## What it does
 
-- Displays a five-stock watchlist (NVDA, TSLA, AAPL, MSFT and AMD) with selectable daily price charts.
+- Displays a ten-stock watchlist (NVDA, TSLA, AAPL, MSFT, AMD, GOOG, AMZN, META, ORCL and JPM) with selectable daily price charts.
 - Fetches quotes and daily history from Alpha Vantage, with a PostgreSQL cache to reduce repeated requests.
 - Tracks total equity, protected capital, trading capital and the position limit as separate values.
 - Requires a token-protected manual action before moving from BOOTSTRAP to PROFIT_ONLY.
